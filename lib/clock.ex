@@ -27,13 +27,17 @@ defmodule Clock do
   end
 
   def handle_cast({:add_tick_handler, listener}, {ms, event}) do
-    GenEvent.add_handler(event, listener, [])
+    Task.start(fn ->
+      for x <- GenEvent.stream(event) do
+        GenServer.cast(listener, x)
+      end
+    end)
     {:noreply, {ms, event}}
   end
 
   def handle_cast({:start_timer}, {ms, event}) do
-    {:ok, timer} = :timer.apply_interval(ms, __MODULE__, :_timer_interval, [event])
-    {:noreply, {ms, event, timer}}
+    :timer.apply_interval(ms, __MODULE__, :_timer_interval, [event])
+    {:noreply, {ms, event}}
   end
 
   def handle_cast({:stop_timer}, {ms, event, timer}) do
