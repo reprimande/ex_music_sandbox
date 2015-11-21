@@ -3,8 +3,8 @@ defmodule P2 do
     SC3.Server.start_link
     {:ok, clock} = Clock.start_link(100)
 
-    {:ok, l} = LogisticMap.start_link(3.8, 0.5)
-    {:ok, s1} = StepSequencer.start_link(fn () -> Enum.at([0,2,3,5,7,9,10], round(LogisticMap.next_val(l) * 6)) + 60 end)
+    {:ok, l} = LogisticMap.start_link(3.89, 0.1)
+    {:ok, s1} = StepSequencer.start_link(fn () -> Enum.at([0,2,3,5,6,8,10], trunc(LogisticMap.next_val(l) * 7)) + 60 end)
 
     Clock.add_tick_handler(clock, s1)
 

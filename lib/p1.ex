@@ -6,7 +6,7 @@ defmodule P1 do
     {:ok, s2} = StepSequencer.start_link([0,0,0,0,0,0,1,0])
     {:ok, s3} = StepSequencer.start_link([1,1,1,1,1,1,1,1])
     {:ok, s4} = StepSequencer.start_link([60,65,67,60,65,67,65,69])
-    {:ok, s5} = StepSequencer.start_link([[60,65,67], [], [], [60,65,67], [], [60,65,67], [], [60,65,67], []])
+    {:ok, s5} = StepSequencer.start_link([[72, 76, 79], [], [], [72, 76,79], [], [72, 76,79], [], [72, 76,79]])
     Clock.add_tick_handler(clock, s1)
     Clock.add_tick_handler(clock, s2)
     Clock.add_tick_handler(clock, s3)
