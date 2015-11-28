@@ -1,6 +1,10 @@
 defmodule Clock do
   use GenServer
 
+  def bpm2ms(bpm, div \\ 1) do
+    trunc(60 / bpm * 1000 / div)
+  end
+
   def start(pid) do
     GenServer.cast(pid, {:start_timer})
   end

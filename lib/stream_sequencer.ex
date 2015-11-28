@@ -1,4 +1,6 @@
 defmodule StreamSequencer do
+  use GenServer
+
   def start_link(stream) do
     GenServer.start_link(__MODULE__, [stream])
   end
@@ -18,7 +20,7 @@ defmodule StreamSequencer do
         GenServer.cast(listener, {event_name, x})
       end
     end)
-    {:noreply, {state}}
+    {:noreply, state}
   end
 
   def handle_cast({:tick}, state) do

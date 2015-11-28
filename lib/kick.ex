@@ -14,12 +14,12 @@ defmodule Kick do
   end
 
   def handle_cast({:play}, _) do
-    SC3.Server.send_msg("s_new", ["kick01", SC3.Server.get_node_id])
+    SC3.Server.send_msg("s_new", ["kick01", SC3.Server.get_node_id, 1, 0])
     {:noreply, {}}
   end
 
   def handle_cast({:trigger, 1}, _) do
-    SC3.Server.send_msg("s_new", ["kick01", SC3.Server.get_node_id])
+    SC3.Server.send_msg("s_new", ["kick01", SC3.Server.get_node_id, 1, 0])
     {:noreply, {}}
   end
 
