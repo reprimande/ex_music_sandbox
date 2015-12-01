@@ -15,23 +15,23 @@ defmodule Mcml do
     |> Enum.map(fn (c) -> Enum.map(c, fn (n) -> n + 48 end) end)
 
     SC3.Server.start_link
-    {:ok, clock} = Clock.start_link(Clock.bpm2ms(130, 2))
+    {:ok, clock} = Clock.start_link(Clock.bpm2ms(130, 4))
 
     {:ok, kick} = Kick.start_link
     {:ok, clap} = Clap.start_link
     {:ok, hat} = HiHat.start_link
-    {:ok, fm} = FmSynth.start_link
+    {:ok, piano} = Piano.start_link
 
     tracks = [
-      { kick, [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,1] },
-      { clap, [0,0,1,0, 0,0,1,0, 0,0,1,1, 0,1,1,0] },
-      { hat,  [1,1,1,0, 1,1,1,1, 1,0,1,1] },
-      { fm,   seq1 },
-      { fm,   seq2 }
+      { kick, [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,1,1], 1 },
+      { clap, [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,1,0,1], 1 },
+      { hat,  [1,1,1,0, 1,1,1,1, 1,0,1,1], 1 },
+      { piano,   seq1, 2 },
+      { piano,   seq2, 2 }
     ]
 
-    Enum.each(tracks, fn({i, s}) ->
-      {:ok, seq} = StreamSequencer.start_link(Stream.cycle(s))
+    Enum.each(tracks, fn({i, s, d}) ->
+      {:ok, seq} = StreamSequencer.start_link(Stream.cycle(s), d)
       Clock.add_tick_handler(clock, seq)
       StreamSequencer.add_step_handler(seq, i, :trigger)
     end)
