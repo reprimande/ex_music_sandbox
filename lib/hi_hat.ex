@@ -1,29 +1,29 @@
 defmodule HiHat do
   use GenServer
 
-  def start_link do
-    GenServer.start_link(__MODULE__, [])
+  def start_link(dur \\ 0.3) do
+    GenServer.start_link(__MODULE__, [dur])
   end
 
-  def init(_) do
-    {:ok, {}}
+  def init([dur]) do
+    {:ok, {dur}}
   end
 
   def play(pid) do
     GenServer.cast(pid, {:play})
   end
 
-  def handle_cast({:play}, _) do
-    SC3.Server.send_msg("s_new", ["hat01", SC3.Server.get_node_id, 1, 0])
-    {:noreply, {}}
+  def handle_cast({:play}, {dur}) do
+    SC3.Server.send_msg("s_new", ["hat01", SC3.Server.get_node_id, 1, 0, "dur", dur])
+    {:noreply, {dur}}
   end
 
-  def handle_cast({:trigger, 1}, _) do
-    SC3.Server.send_msg("s_new", ["hat01", SC3.Server.get_node_id, 1, 0])
-    {:noreply, {}}
+  def handle_cast({:trigger, 1}, {dur}) do
+    SC3.Server.send_msg("s_new", ["hat01", SC3.Server.get_node_id, 1, 0, "dur", dur])
+    {:noreply, {dur}}
   end
 
-  def handle_cast({:trigger, _}, _) do
-    {:noreply, {}}
+  def handle_cast({:trigger, _}, {dur}) do
+    {:noreply, {dur}}
   end
 end
