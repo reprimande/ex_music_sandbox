@@ -1,5 +1,11 @@
 defmodule Mcml do
+  use GenServer
+
   def play do
+    GenServer.start_link(__MODULE__, [], name: __MODULE__)
+  end
+
+  def init(_) do
     seq1 = [[3], [6], [3],        [-2],   [3],        [],      [],     [],
             [],  [],  [-2, 3],    [0, 6], [-2, 3],    [0, 6],  [3, 8], [0, 6],
             [3], [6], [3],        [-2],   [1],        [],      [],     [],
@@ -18,17 +24,19 @@ defmodule Mcml do
 
     {:ok, kick} = Kick.start_link
     {:ok, clap} = Clap.start_link
+    {:ok, snare} = Snare.start_link
     {:ok, ch} = HiHat.start_link
     {:ok, oh} = HiHat.start_link(0.8)
     {:ok, piano} = Piano.start_link
 
     tracks = [
-      { kick, [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,1,1, 1,0,0,0, 1,0,0,0, 1,0,0,1, 1,0,0,1], 1 },
-      { clap, [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,1,0,1, 0,0,0,0, 1,0,0,0, 0,1,0,0, 0,1,1,0], 1 },
-      { ch,   [1,1,0,0, 1,1,0,0, 1,1,0,0, 1,0,0,1], 1 },
-      { oh,   [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,1,1,0], 1 },
-      { piano,   seq1, 2 },
-      { piano,   seq2, 2 }
+      { kick,  [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,1,1, 1,0,0,0, 1,0,0,0, 1,0,0,1, 1,0,0,1], 1 },
+      { clap,  [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,1,0,1, 0,0,0,0, 1,0,0,0, 0,0,1,0, 0,1,1,0], 1 },
+      { snare, [0,0,0,0, 0,0,1,0, 0,0,1,1, 0,1,0,1, 0,0,0,1, 0,0,1,0, 0,0,0,1, 0,0,1,1], 1 },
+      { ch,    [1,1,0,0, 1,1,0,0, 1,1,0,0, 1,0,0,1], 1 },
+      { oh,    [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,1,1,0], 1 },
+      { piano, seq1, 2 },
+      { piano, seq2, 2 }
     ]
 
     Enum.each(tracks, fn({i, s, d}) ->
@@ -38,9 +46,15 @@ defmodule Mcml do
     end)
 
     Clock.start(clock)
+    {:ok, {clock}}
   end
 
-  def stop(pid) do
+  def stop do
+    GenServer.cast(__MODULE__, {:stop})
+  end
 
+  def handle_cast({:stop}, _) do
+    SC3.Server.stop
+    {:stop, :normal, {}}
   end
 end
