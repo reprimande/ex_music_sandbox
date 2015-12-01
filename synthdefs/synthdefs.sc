@@ -3,18 +3,18 @@ s.boot;
 SynthDef(\kick01, {
   var e0, e1, out;
   e0 = EnvGen.ar(Env.perc(0.001, 0.3), doneAction: 2);
-	e1 = EnvGen.ar(Env.new([4000, 200, 40], [0.001, 0.2], [-4, -10]));
+  e1 = EnvGen.ar(Env.new([4000, 200, 40], [0.001, 0.2], [-4, -10]));
   out = LPF.ar(WhiteNoise.ar(1), e1 * 1.5, e0);
   out = out + SinOsc.ar(e1, 0.5, e0);
   Out.ar(0, out.dup);
 }).add;
 
 SynthDef(\clap01, {|amp=1.0|
-	var e1, e2, n1, n2, out;
+  var e1, e2, n1, n2, out;
   e1 = EnvGen.ar(Env.new([0, 1, 0, 1, 0, 1, 0, 1, 0], [0.001, 0.013, 0, 0.01, 0, 0.01, 0, 0.03], [0, -3, 0, -3, 0, -3, 0, -4]));
   e2 = EnvGen.ar(Env.perc(0.01, 0.4), doneAction:2);
   n1 = BPF.ar(HPF.ar(WhiteNoise.ar(e1), 600), 2000, 3);
-	n2 = BPF.ar(HPF.ar(WhiteNoise.ar(e2), 1000), 1200, 0.7, 0.7);
+  n2 = BPF.ar(HPF.ar(WhiteNoise.ar(e2), 1000), 1200, 0.7, 0.7);
   out = n1 + n2;
   out = out * amp;
 
@@ -53,4 +53,20 @@ SynthDef(\bass01, {|freq=440, ffreq=1000, amp=1.0, dur=2, slew=0.08, gate=1|
   o = RLPF.ar(Saw.ar(Lag.kr(freq, slew)), freq + e2, 0.1) * e1;
   Out.ar(0, o.softclip.dup);
 }).add;
+
+SynthDef(\piano01, {|freq = 440, dur=0.9|
+  var out, env, env2;
+  env = EnvGen.kr(Env.perc(0.01, dur, 1.0, -8), doneAction: 2);
+  out = Mix.ar(Array.fill(3, { arg i;
+    var detune, delayTime, hammer;
+    detune = #[-0.05, 0, 0.04].at(i);
+    delayTime = 1 / (freq + detune);
+    hammer = LFNoise2.ar(3000, env);
+    CombL.ar(hammer,		// used as a string resonator
+      delayTime, 		// max delay time
+      delayTime,			// actual delay time
+      3) 				// decay time of string
+  })) * 0.3 * 0.5;
+  Out.ar(0, out.dup);
+}).add
 )
