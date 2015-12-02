@@ -31,9 +31,9 @@ defmodule Clock do
   end
 
   def handle_cast({:add_tick_handler, listener}, {ms, event}) do
-    Task.start(fn ->
-      for x <- GenEvent.stream(event) do
-        GenServer.cast(listener, x)
+    Task.start_link(fn ->
+      for e <- GenEvent.stream(event) do
+        GenServer.cast(listener, e)
       end
     end)
     {:noreply, {ms, event}}

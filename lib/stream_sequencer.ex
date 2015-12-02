@@ -15,9 +15,9 @@ defmodule StreamSequencer do
   end
 
   def handle_cast({:add_step_handler, listener, event_name}, state) do
-    Task.start(fn ->
-      for x <- GenEvent.stream(state.event) do
-        GenServer.cast(listener, {event_name, x})
+    Task.start_link(fn ->
+      for e <- GenEvent.stream(state.event) do
+        GenServer.cast(listener, {event_name, e})
       end
     end)
     {:noreply, state}
