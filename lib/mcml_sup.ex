@@ -6,7 +6,7 @@ defmodule McmlSup do
   end
 
   def stop(sup) do
-    Process.exit(sup, :kill)
+    Process.exit(sup, :normal)
   end
 
   def init(_) do
