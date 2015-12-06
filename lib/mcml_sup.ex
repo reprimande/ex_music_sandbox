@@ -20,8 +20,7 @@ defmodule McmlSup do
             [-2], [5], [],  [],  [],  [10], [8],  [3]
            ] |> Enum.map(fn (c) -> Enum.map(c, fn (n) -> n + 60 end) end)
 
-    Supervisor.start_child(sup, worker(SC3.Server.start_link, []))
-    {:ok, clock} = Supervisor.start_child(sup, worker(Clock, [Clock.bpm2ms(130, 4)]))
+    {:ok, clock} = Supervisor.start_child(sup, worker(Clock, [Clock.bpm2ms(125, 4)]))
 
     [
       { "kick",    Kick,  [],    [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,1,1, 1,0,0,0, 1,0,0,0, 1,0,0,1, 1,0,0,1], 1 },
@@ -44,7 +43,7 @@ defmodule McmlSup do
   end
 
   def init(_) do
-    supervise([], strategy: :one_for_one)
+    supervise([worker(SC3.Server, [])], strategy: :one_for_one)
   end
 
   def stop(sup) do
