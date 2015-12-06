@@ -1,8 +1,8 @@
 defmodule HiHat do
   use GenServer
 
-  def start_link(dur \\ 0.3) do
-    GenServer.start_link(__MODULE__, [dur])
+  def start_link(dur \\ 0.3, opts \\ []) do
+    GenServer.start_link(__MODULE__, [dur], opts)
   end
 
   def init([dur]) do
