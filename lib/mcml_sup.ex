@@ -21,29 +21,21 @@ defmodule McmlSup do
            ] |> Enum.map(fn (c) -> Enum.map(c, fn (n) -> n + 60 end) end)
 
     Supervisor.start_child(sup, worker(SC3.Server.start_link, []))
-
     {:ok, clock} = Supervisor.start_child(sup, worker(Clock, [Clock.bpm2ms(130, 4)]))
 
-    {:ok, kick} = Supervisor.start_child(sup, worker(Kick, []))
-    {:ok, clap} = Supervisor.start_child(sup, worker(Clap, []))
-    {:ok, snare} = Supervisor.start_child(sup, worker(Snare, []))
-    {:ok, ch} = Supervisor.start_child(sup, worker(HiHat, [0.3], id: :ch1))
-    {:ok, oh} = Supervisor.start_child(sup, worker(HiHat, [0.8], id: :oh1))
-    {:ok, piano} = Supervisor.start_child(sup, worker(Piano, []))
-
     [
-      { :kick, kick,  [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,1,1, 1,0,0,0, 1,0,0,0, 1,0,0,1, 1,0,0,1], 1 },
-      { :clap, clap,  [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,1,0,1, 0,0,0,0, 1,0,0,0, 0,0,1,0, 0,1,1,0], 1 },
-      { :snare, snare, [0,0,0,0, 0,0,1,0, 0,0,1,1, 0,1,0,1, 0,0,0,1, 0,0,1,0, 0,0,0,1, 0,0,1,1], 1 },
-      { :ch, ch,    [1,1,0,0, 1,1,0,0, 1,1,0,0, 1,0,0,1], 1 },
-      { :oh, oh,    [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,1,1,0], 1 },
-      { :piano_r, piano, seq1, 2 },
-      { :piano_l, piano, seq2, 2 }
-    ] |>  Enum.each(fn({n, i, s, d}) ->
-      {:ok, seq} = Supervisor.start_child(sup, worker(StreamSequencer, [Stream.cycle(s), d], id: n))
-
+      { "kick",    Kick,  [],    [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,1,1, 1,0,0,0, 1,0,0,0, 1,0,0,1, 1,0,0,1], 1 },
+      { "clap",    Clap,  [],    [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,1,0,1, 0,0,0,0, 1,0,0,0, 0,0,1,0, 0,1,1,0], 1 },
+      { "snare",   Snare, [],    [0,0,0,0, 0,0,1,0, 0,0,1,1, 0,1,0,1, 0,0,0,1, 0,0,1,0, 0,0,0,1, 0,0,1,1], 1 },
+      { "ch",      HiHat, [0.3], [1,1,0,0, 1,1,0,0, 1,1,0,0, 1,0,0,1], 1 },
+      { "oh",      HiHat, [0.8], [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,1,1,0], 1 },
+      { "piano_r", Piano, [],    seq1, 2 },
+      { "piano_l", Piano, [],    seq2, 2 }
+    ] |>  Enum.each(fn({n, m, o, s, d}) ->
+      {:ok, inst} = Supervisor.start_child(sup, worker(m, o, id: n <> "_inst"))
+      {:ok, seq} = Supervisor.start_child(sup, worker(StreamSequencer, [Stream.cycle(s), d], id: n <> "_seq"))
       Clock.add_tick_handler(clock, seq)
-      StreamSequencer.add_step_handler(seq, i, :trigger)
+      StreamSequencer.add_step_handler(seq, inst, :trigger)
     end)
 
     Clock.start(clock)
