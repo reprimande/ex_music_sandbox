@@ -4,8 +4,10 @@ defmodule LogisticMap do
   end
 
   def next_val(pid) do
-    Agent.update(pid, fn {r, x} -> {r, calc(r, x)} end)
-    Agent.get(pid, fn {_, x} -> x end)
+    Agent.get_and_update(pid, fn {r, x} ->
+      z = calc(r, x)
+      {z, {r, z}}
+    end)
   end
 
   def calc(r, x) do

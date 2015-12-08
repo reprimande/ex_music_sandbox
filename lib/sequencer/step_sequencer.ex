@@ -13,17 +13,18 @@ defmodule StepSequencer do
   end
 
   def handle_cast({:add_step_handler, listener, event_name}, {event, pattern, current}) do
-    Task.start(fn ->
-      for x <- GenEvent.stream(event) do
-        GenServer.cast(listener, {event_name, x})
+    Task.start_link(fn ->
+      for e <- GenEvent.stream(event) do
+        GenServer.cast(listener, {event_name, e})
       end
     end)
     {:noreply, {event, pattern, current}}
   end
 
   def handle_cast({:tick}, {event, pattern, []}) when is_list(pattern) do
-    GenEvent.notify(event, hd(pattern))
-    {:noreply, {event, pattern, tl(pattern)}}
+    [val|rest] = pattern
+    GenEvent.notify(event, val)
+    {:noreply, {event, pattern, rest}}
   end
 
   def handle_cast({:tick}, {event, func, []}) when is_function(func) do
@@ -31,8 +32,8 @@ defmodule StepSequencer do
     {:noreply, {event, func, []}}
   end
 
-  def handle_cast({:tick}, {event, pattern, current}) do
-    GenEvent.notify(event, hd(current))
-    {:noreply, {event, pattern, tl(current)}}
+  def handle_cast({:tick}, {event, pattern, [val|rest]}) do
+    GenEvent.notify(event, val)
+    {:noreply, {event, pattern, rest}}
   end
 end
