@@ -3,7 +3,7 @@ defmodule Markov do
     Agent.start_link(fn -> {dict, start_val} end)
   end
 
-  def val(pid) do
+  def next_val(pid) do
     Agent.get_and_update(pid, fn {dict, val} ->
       {val, {dict, dict[val] |> Enum.random}}
     end)
