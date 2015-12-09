@@ -32,7 +32,7 @@ defmodule StepSequencer do
   end
 
   def handle_cast({:tick}, {event, func, [], step, div}) when is_function(func) and rem(step, div) == 0  do
-    GenEvent.notify(event, func.())
+    GenEvent.notify(event, func.(step))
     {:noreply, {event, func, [], step + 1, div}}
   end
 

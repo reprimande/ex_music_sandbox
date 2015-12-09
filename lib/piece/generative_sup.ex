@@ -1,4 +1,4 @@
-defmodule MarkovChordSup do
+defmodule GenerativeTestSup do
   use Supervisor
 
   def play do
@@ -18,13 +18,13 @@ defmodule MarkovChordSup do
     scale = [0,2,4,5,7,9,11,12,14,16,17,19,21,23,24]
 
     {:ok, sup} = Supervisor.start_link(__MODULE__, [])
-    {:ok, c} = Supervisor.start_child(sup, worker(Clock, [Clock.bpm2ms(80, 4)]))
+    {:ok, c} = Supervisor.start_child(sup, worker(Clock, [Clock.bpm2ms(80, 6)]))
     {:ok, m} = Supervisor.start_child(sup, worker(Markov, [chord_chain, :I]))
     {:ok, l} = Supervisor.start_child(sup, worker(LogisticMap, [3.89, 0.1]))
 
     {:ok, s1} = Supervisor.start_child(sup, worker(
           StepSequencer, [
-            fn () ->
+            fn (n) ->
               Markov.next_val(m)
               |> MidiUtil.atom2chord
               |> Enum.map(fn n ->
@@ -34,15 +34,16 @@ defmodule MarkovChordSup do
                 end
               end)
               |> Enum.map(&(&1 + 60))
-          end, 3],
+          end, 6],
           id: :markov_seq))
 
     {:ok, s2} = Supervisor.start_child(sup, worker(
           StepSequencer, [
-            fn () ->
-              index = trunc(LogisticMap.next_val(l) * length(scale))
-              scale
-              |> Enum.at(index) + 60
+            fn (n) ->
+              case :rand.uniform(3) do
+                1 -> 0
+                _ -> Enum.at(scale, trunc(LogisticMap.next_val(l) * length(scale))) + 60
+              end
             end],
           id: :logistic_seq))
 
