@@ -16,30 +16,24 @@ defmodule GenerativeTestSup do
       vii: [:I]
     }
     scale = [0,2,4,5,7,9,11,12,14,16,17,19,21,23,24]
+    perc_probs = [
+      { "kick",  Kick,  [],    [10, 0, 2, 0, 6, 0, 2, 0, 3, 0, 6, 0, 1, 0, 2, 4] },
+      { "snare", Snare, [],    [0,  0, 1, 0, 1, 0, 6, 0, 6, 0, 1, 0, 1, 0, 6, 0] },
+      { "ch",    HiHat, [0.3], [10, 2, 8, 2, 1, 2] },
+      { "oh",    HiHat, [0.8], [0,  0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0] }
+    ]
 
     {:ok, sup} = Supervisor.start_link(__MODULE__, [])
 
-    {:ok, fm} = Supervisor.start_child(sup, worker(FmSynth, []))
-    {:ok, kick} = Supervisor.start_child(sup, worker(Kick, []))
-    {:ok, snare} = Supervisor.start_child(sup, worker(Snare, []))
-    {:ok, ch} = Supervisor.start_child(sup, worker(HiHat, [0.2], id: :ch1))
-    {:ok, oh} = Supervisor.start_child(sup, worker(HiHat, [0.8], id: :oh1))
-
-
-    perc_probs = [
-      { "k", kick,  [10, 0, 2, 0, 6, 0, 2, 0, 3, 0, 6, 0, 1, 0, 2, 4] },
-      { "s", snare, [0,  0, 1, 0, 1, 0, 6, 0, 6, 0, 1, 0, 1, 0, 6, 0] },
-      { "ch", ch,   [10, 2, 8, 2, 1, 2] },
-      { "oh", oh,   [0,  0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0] }
-    ]
-
     {:ok, c} = Supervisor.start_child(sup, worker(Clock, [Clock.bpm2ms(80, 12)]))
+
     {:ok, m} = Supervisor.start_child(sup, worker(Markov, [chord_chain, :I]))
     {:ok, l} = Supervisor.start_child(sup, worker(LogisticMap, [3.89, 0.1]))
 
+    {:ok, fm} = Supervisor.start_child(sup, worker(FmSynth, []))
     {:ok, s1} = Supervisor.start_child(sup, worker(
           StepSequencer, [
-            fn (n) ->
+            fn (_) ->
               Markov.next_val(m)
               |> MidiUtil.atom2chord
               |> MidiUtil.add_7th
@@ -52,41 +46,40 @@ defmodule GenerativeTestSup do
               |> Enum.map(&(&1 + 60))
           end, 12],
           id: :markov_seq))
+    Clock.add_tick_handler(c, s1)
+    StepSequencer.add_step_handler(s1, fm, :trigger)
 
     {:ok, s2} = Supervisor.start_child(sup, worker(
           StepSequencer, [
-            fn (n) ->
+            fn (_) ->
               case :rand.uniform(3) do
                 1 -> 0
                 _ -> Enum.at(scale, trunc(LogisticMap.next_val(l) * length(scale))) + 60
               end
             end, 2],
           id: :logistic_seq))
+    Clock.add_tick_handler(c, s2)
+    StepSequencer.add_step_handler(s2, fm, :trigger)
 
-    perc_probs |> Enum.each(fn {n, i, p} ->
+    perc_probs |> Enum.each(fn {name, module, params, prob} ->
+      {:ok, i} = Supervisor.start_child(sup, worker(module, params, id: name <> "_inst"))
       {:ok, s} = Supervisor.start_child(sup, worker(
             StepSequencer, [
             fn (n) ->
-              len = length(p)
+              len = length(prob)
               index = rem(n, len)
-              val = p |> Enum.at(index)
+              val = prob |> Enum.at(index)
               case :rand.uniform(9) do
                 n when n < val -> 1
                 _ -> 0
               end
             end, 1],
-      id: n <> "_seq"))
+      id: name <> "_seq"))
       Clock.add_tick_handler(c, s)
       StepSequencer.add_step_handler(s, i, :trigger)
     end)
 
-    Clock.add_tick_handler(c, s1)
-    Clock.add_tick_handler(c, s2)
-
-    StepSequencer.add_step_handler(s1, fm, :trigger)
-    StepSequencer.add_step_handler(s2, fm, :trigger)
     Clock.start(c)
-
     {:ok, sup}
   end
 
