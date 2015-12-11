@@ -28,4 +28,13 @@ defmodule MidiUtil do
       _ -> []
     end
   end
+
+  def simple_invert(chord, thresh) do
+    chord |> Enum.map(fn n ->
+      case n do
+        n when n > thresh -> n - 12
+        _ -> n
+      end
+    end)
+  end
 end
