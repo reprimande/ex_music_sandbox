@@ -14,12 +14,12 @@ defmodule HiHat do
   end
 
   def handle_cast({:play}, {dur}) do
-    SC3.Server.send_msg("s_new", ["hat01", SC3.Server.get_node_id, 1, 0, "dur", dur])
+    SC3.Server.send_msg("s_new", ["hat01", SC3.Server.get_node_id, 0, 0, "dur", dur])
     {:noreply, {dur}}
   end
 
   def handle_cast({:trigger, 1}, {dur}) do
-    SC3.Server.send_msg("s_new", ["hat01", SC3.Server.get_node_id, 1, 0, "dur", dur])
+    SC3.Server.send_msg("s_new", ["hat01", SC3.Server.get_node_id, 0, 0, "dur", dur])
     {:noreply, {dur}}
   end
 

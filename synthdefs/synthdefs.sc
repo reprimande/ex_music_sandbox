@@ -21,10 +21,10 @@ SynthDef(\clap01, {|amp=1.0|
   Out.ar(0, out.dup);
 }).add;
 
-SynthDef(\hat01, {|amp=0.1, dur=0.5|
+SynthDef(\hat01, {|amp=0.38, dur=0.3|
   var e1, out;
   e1 = EnvGen.ar(Env.perc(0.0001, dur, 1, -8), doneAction:2);
-  out = RHPF.ar(ClipNoise.ar(1), 9000, 0.2) * e1 * amp;
+  out = RHPF.ar(ClipNoise.ar(1), 7000, 0.7) * e1 * amp;
   Out.ar(0, out.dup);
 }).add;
 
@@ -54,17 +54,17 @@ SynthDef(\bass01, {|freq=440, ffreq=1000, amp=1.0, dur=2, slew=0.08, gate=1|
   Out.ar(0, o.softclip.dup);
 }).add;
 
-SynthDef(\piano01, {|freq = 440, dur=1.0|
+SynthDef(\piano01, {|freq = 440, dur=1.2|
   var out, env, env2;
-  env = EnvGen.kr(Env.perc(0.01, dur, 1.0, -4), doneAction: 2);
-  out = Mix.ar(Array.fill(3, { arg i;
+  env = EnvGen.kr(Env.perc(0.001, dur, 1.0, -4), doneAction: 2);
+  out = Mix.ar(Array.fill(3, {|i|
     var detune, delayTime, hammer;
     detune = #[-0.05, 0, 0.04].at(i);
     delayTime = 1 / (freq + detune);
-    hammer = LFNoise2.ar(3000, env);
-    CombL.ar(hammer, delayTime, delayTime, 3)
-  })) * 0.3 * 0.5;
-  DetectSilence.ar(out, doneAction: 4);
+    hammer = LFNoise2.ar(5000, env);
+    CombL.ar(hammer, delayTime, delayTime, 2.0);
+  })) * 0.1;
+	DetectSilence.ar(out, doneAction:2);
   Out.ar(0, out.dup);
 }).add
 )

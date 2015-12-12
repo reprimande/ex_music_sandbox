@@ -7,7 +7,7 @@ defmodule Bass do
 
   def init(_) do
     node_id = SC3.Server.get_node_id
-    SC3.Server.send_msg("s_new", ["bass01", node_id, 1, 0, "gate", 0])
+    SC3.Server.send_msg("s_new", ["bass01", node_id, 0, 0, "gate", 0])
     {:ok, {node_id}}
   end
 

@@ -1,2 +1,2 @@
-%{"exosc": {:git, "https://github.com/naokinomoto/exosc.git", "5c76f32b4c8ba15850496c86636d9b6aee2d17a9", []},
-  "exsc3": {:git, "https://github.com/naokinomoto/exsc3.git", "a7743cfd52a8e771088791760fe3140410bb5756", []}}
+%{"exosc": {:git, "https://github.com/naokinomoto/exosc.git", "717b6a711ce1f6ed41e2db96b91ef0b827601ae8", []},
+  "exsc3": {:git, "https://github.com/naokinomoto/exsc3.git", "d52bd4bce2132eb21e2a35401095414449c79575", []}}

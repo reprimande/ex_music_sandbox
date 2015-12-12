@@ -14,12 +14,12 @@ defmodule Snare do
   end
 
   def handle_cast({:play}, _) do
-    SC3.Server.send_msg("s_new", ["snare01", SC3.Server.get_node_id])
+    SC3.Server.send_msg("s_new", ["snare01", SC3.Server.get_node_id, 0, 0])
     {:noreply, {}}
   end
 
   def handle_cast({:trigger, 1}, _) do
-    SC3.Server.send_msg("s_new", ["snare01", SC3.Server.get_node_id])
+    SC3.Server.send_msg("s_new", ["snare01", SC3.Server.get_node_id, 0, 0])
     {:noreply, {}}
   end
 
