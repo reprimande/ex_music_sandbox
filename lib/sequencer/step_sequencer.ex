@@ -1,4 +1,6 @@
 defmodule StepSequencer do
+  use GenServer
+
   def start_link(pattern, div \\ 1) do
     GenServer.start_link(__MODULE__, [pattern, div])
   end

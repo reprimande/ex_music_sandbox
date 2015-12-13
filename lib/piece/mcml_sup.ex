@@ -30,11 +30,11 @@ defmodule McmlSup do
       { "oh",      HiHat, [0.8], [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,1,1,0], 1 },
       { "piano_r", Piano, [],    seq1, 2 },
       { "piano_l", Piano, [],    seq2, 2 }
-    ] |>  Enum.each(fn({n, m, o, s, d}) ->
+    ] |>  Enum.each(fn({n, m, o, p, d}) ->
       {:ok, inst} = Supervisor.start_child(sup, worker(m, o, id: n <> "_inst"))
-      {:ok, seq} = Supervisor.start_child(sup, worker(StreamSequencer, [Stream.cycle(s), d], id: n <> "_seq"))
+      {:ok, seq} = Supervisor.start_child(sup, worker(StepSequencer, [p, d], id: n <> "_seq"))
       Clock.add_tick_handler(clock, seq)
-      StreamSequencer.add_step_handler(seq, inst, :trigger)
+      StepSequencer.add_step_handler(seq, inst, :trigger)
     end)
 
     Clock.start(clock)

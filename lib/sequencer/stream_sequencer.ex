@@ -1,12 +1,21 @@
 defmodule StreamSequencer do
   use GenServer
 
-  def start_link(stream, div \\ 1) do
-    GenServer.start_link(__MODULE__, [stream, div])
+  def start_link(pattern, div \\ 1)  do
+    GenServer.start_link(__MODULE__, [pattern, div])
   end
 
-  def init([stream, div]) do
+  def init([pattern, div]) when is_list(pattern) do
     {:ok, event} = GenEvent.start_link
+    stream = Stream.cycle(pattern)
+    {:ok, %{ step: 0, stream: stream, event: event, div: div }}
+  end
+
+  def init([pattern, div]) when is_function(pattern) do
+    {:ok, event} = GenEvent.start_link
+    stream = Stream.unfold(0, fn n ->
+      { pattern.(n), n + 1 }
+    end)
     {:ok, %{ step: 0, stream: stream, event: event, div: div }}
   end
 

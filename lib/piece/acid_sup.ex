@@ -15,11 +15,11 @@ defmodule AcidSup do
       { "s2", Clap,  [0,0,0,0, 0,1,0,0, 0,0,0,1, 0,0,1,0] },
       { "s3", HiHat, [1,1,1,0, 1,1,1,1, 1,0,1,1] },
       { "s4", Bass,  [24,36,48,36, 0,24,48,60, 24,48,0,36, 60,60,0,60] }
-    ] |>  Enum.each(fn({n, m, s}) ->
+    ] |>  Enum.each(fn({n, m, p}) ->
       {:ok, inst} = Supervisor.start_child(sup, worker(m, [], id: n <> "_inst"))
-      {:ok, seq} = Supervisor.start_child(sup, worker(StreamSequencer, [Stream.cycle(s)], id: n <> "_seq"))
+      {:ok, seq} = Supervisor.start_child(sup, worker(StepSequencer, [p], id: n <> "_seq"))
       Clock.add_tick_handler(clock, seq)
-      StreamSequencer.add_step_handler(seq, inst, :trigger)
+      StepSequencer.add_step_handler(seq, inst, :trigger)
     end)
 
     Clock.start(clock)

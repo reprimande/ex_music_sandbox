@@ -6,7 +6,7 @@ defmodule GenerativeTestSup do
   end
 
   def start_link do
-    chord_chain = %{
+    chord_chain_dict = %{
       I:   [:ii, :iii, :IV, :V, :vi, :vii],
       ii:  [:V, :vii],
       iii: [:IV, :vi],
@@ -28,7 +28,7 @@ defmodule GenerativeTestSup do
     {:ok, c} = Supervisor.start_child(sup, worker(Clock, [Clock.bpm2ms(80, 12)]))
 
     {:ok, fm} = Supervisor.start_child(sup, worker(FmSynth, []))
-    {:ok, m} = Supervisor.start_child(sup, worker(Markov, [chord_chain, :I]))
+    {:ok, m} = Supervisor.start_child(sup, worker(Markov, [chord_chain_dict, :I]))
     {:ok, s1} = Supervisor.start_child(
       sup, worker(
         StepSequencer,
