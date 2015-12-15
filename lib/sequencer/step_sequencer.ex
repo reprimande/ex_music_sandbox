@@ -15,7 +15,7 @@ defmodule StepSequencer do
   end
 
   def handle_cast({:add_step_handler, listener, event_name}, {event, pattern, current, step, div}) do
-    Task.start(fn ->
+    Task.start_link(fn ->
       for e <- GenEvent.stream(event) do
         GenServer.cast(listener, {event_name, e})
       end
