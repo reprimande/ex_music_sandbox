@@ -21,6 +21,16 @@ SynthDef(\clap01, {|amp=1.0|
   Out.ar(0, out.dup);
 }).add;
 
+SynthDef(\snare01, {|amp = 0.5, decay = 0.2, pan = 0.0|
+	var env1, env2, out;
+	env1 = EnvGen.ar(Env.new([0.5, 1, 0], [0.005, 0.2]), doneAction:2);
+	env2 = EnvGen.ar(Env.new([5000, 300, 50], [0.005, 0.05], [-4, -5]));
+	out = LFPulse.ar(env2, 0, 0.5);
+	out = LPF.ar(out, env2 * 1.5, env1);
+	out = out + BPF.ar(WhiteNoise.ar(1), 5000, 0.6) * env1 * amp;
+	Out.ar(0, out.dup);
+}).add;
+
 SynthDef(\hat01, {|amp=0.38, dur=0.3|
   var e1, out;
   e1 = EnvGen.ar(Env.perc(0.0001, dur, 1, -8), doneAction:2);
